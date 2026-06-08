@@ -1,161 +1,344 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Random Word Picker (No Repeats)</title>
+    <title>Random Word Picker - Red Balloon Cambridge Week</title>
     <style>
+        /* CSS Variables based on the Red Balloon color palette */
+        :root {
+            --rb-red: #D71920;      /* Main Red from buttons/logo */
+            --rb-blue: #3A3699;     /* Blue from "Bilingual School" button */
+            --rb-text-main: #231F20; /* Dark Grey text */
+            --rb-text-sub: #58595B;  /* Lighter Grey text */
+            --rb-bg-light: #F9F9F9;  /* Light background tint */
+            --rb-white: #FFFFFF;
+        }
+
+        /* Loading a clean font from Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
-            color: #333;
-            max-width: 600px;
-            margin: 40px auto;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            background: white;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--rb-bg-light);
+            color: var(--rb-text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        h2 {
-            color: #2c3e50;
-            text-align: center;
+
+        /* --- New Header Layout --- */
+        header {
+            width: 100%;
+            background-color: var(--rb-white);
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+            max-width: 1200px;
+            margin-bottom: 30px;
         }
+
+        .header-logos {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .logo-rb {
+            height: 45px; /* Height adjustment for Red Balloon Logo */
+            width: auto;
+        }
+
+        .logo-cambridge {
+            height: 35px; /* Height adjustment for Cambridge Logo */
+            width: auto;
+        }
+
+        header h1 {
+            font-size: 18px;
+            color: var(--rb-blue);
+            margin: 0;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* --- Layout Container --- */
+        .main-container {
+            display: flex;
+            gap: 30px;
+            max-width: 1200px;
+            width: 100%;
+            padding: 0 40px 40px 40px;
+        }
+
+        /* --- Input & Controller Section --- */
+        .picker-section {
+            flex: 2;
+            background: var(--rb-white);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+
+        p.instruction {
+            color: var(--rb-text-sub);
+            font-size: 14px;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
         textarea {
             width: 100%;
-            height: 100px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            height: 120px;
+            padding: 15px;
+            border: 2px solid #E6E6E6;
+            border-radius: 8px;
             box-sizing: border-box;
             font-size: 16px;
+            font-family: inherit;
             resize: vertical;
+            transition: border-color 0.2s;
         }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--rb-blue);
+        }
+
         .controls {
-            margin: 20px 0;
+            margin: 25px 0;
             display: flex;
-            gap: 10px;
+            gap: 15px;
         }
+
         button {
             flex: 1;
-            padding: 12px;
+            padding: 15px;
             font-size: 16px;
+            font-family: inherit;
             border: none;
-            border-radius: 4px;
+            border-radius: 30px; /* Rounded pill shape */
             cursor: pointer;
-            font-weight: bold;
-            transition: background 0.2s;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease;
         }
+
         .btn-pick {
-            background-color: #2ecc71;
-            color: white;
+            background-color: var(--rb-red);
+            color: var(--rb-white);
         }
         .btn-pick:hover {
-            background-color: #27ae60;
+            background-color: #b5151b;
+            transform: translateY(-2px);
         }
+
         .btn-reset {
-            background-color: #e74c3c;
-            color: white;
+            background-color: var(--rb-blue);
+            color: var(--rb-white);
         }
         .btn-reset:hover {
-            background-color: #c0392b;
+            background-color: #2e2a7a;
+            transform: translateY(-2px);
         }
+
         #result-container {
-            margin-top: 30px;
+            margin-top: 20px;
             text-align: center;
-            min-height: 80px;
+            padding: 30px 20px;
+            background-color: #f0f0f8;
+            border-radius: 12px;
         }
+
         #result {
-            font-size: 32px;
-            font-weight: bold;
-            color: #34495e;
+            font-size: 44px;
+            font-weight: 700;
+            color: var(--rb-red);
             word-wrap: break-word;
+            margin-bottom: 10px;
         }
+
         #counter {
             font-size: 14px;
-            color: #7f8c8d;
-            margin-top: 10px;
+            color: var(--rb-text-sub);
+            font-weight: 400;
+        }
+
+        /* --- Picked List Sidebar --- */
+        .history-section {
+            flex: 1;
+            background: var(--rb-white);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .history-section h3 {
+            color: var(--rb-text-main);
+            margin-top: 0;
+            font-weight: 600;
+            border-bottom: 2px solid var(--rb-bg-light);
+            padding-bottom: 10px;
+        }
+
+        #pickedList {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+
+        #pickedList li {
+            padding: 10px 15px;
+            border-bottom: 1px solid #EEEEEE;
+            color: var(--rb-text-sub);
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        #pickedList li:last-child {
+            border-bottom: none;
+        }
+
+        #pickedList li::before {
+            content: "✓";
+            color: var(--rb-red);
+            font-weight: bold;
+            margin-right: 12px;
+        }
+
+        /* Mobile Responsive adjustments */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+                border-radius: 0;
+            }
+            .main-container {
+                flex-direction: column;
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <h2>Random Word Picker</h2>
-    
-    <p><strong>Step 1:</strong> Paste your comma-separated words below:</p>
-    <textarea id="wordInput" placeholder="apple, banana, cherry, dragonfruit, elderberry"></textarea>
-    
-    <div class="controls">
-        <button class="btn-pick" onclick="pickWord()">Pick a Word</button>
-        <button class="btn-reset" onclick="resetPool()">Reset List</button>
-    </div>
+    <header>
+        <div class="header-logos">
+            <img class="logo-rb" src="./Random Word Picker - Red Balloon Cambridge Week_files/Logo-Header.png" alt="Red Balloon Logo">
+            <h1>Cambridge Week</h1>
+    <img class="logo-cambridge" src="./Random Word Picker - Red Balloon Cambridge Week_files/CEQ_logo.svg" alt="Cambridge English Exam Logo">
+        </div>
+        
+    </header>
 
-    <div id="result-container">
-        <div id="result">...</div>
-        <div id="counter">Words remaining: 0</div>
+    <div class="main-container">
+        <div class="picker-section">
+            <p class="instruction">Paste your comma-separated words below:</p>
+            <textarea id="wordInput" placeholder="apple, banana, cherry, dragonfruit..."></textarea>
+            
+            <div class="controls">
+                <button class="btn-pick" onclick="pickWord()">Pick a Word</button>
+                <button class="btn-reset" onclick="resetPool()">Reset List</button>
+            </div>
+
+            <div id="result-container">
+                <div id="result">...</div>
+                <div id="counter">Words remaining in pool: 0</div>
+            </div>
+        </div>
+
+        <div class="history-section">
+            <h3>Picked List</h3>
+            <ul id="pickedList"></ul>
+        </div>
     </div>
 
     <script>
         let wordPool = [];
+        let pickedWords = [];
 
-        // Initializes or re-initializes the pool from the textarea
         function initializePool() {
             const rawText = document.getElementById('wordInput').value;
             if (!rawText.trim()) {
                 wordPool = [];
-                updateCounter();
+                updateUI();
                 return false;
             }
             
-            // Split by comma, trim whitespace, and filter out empty items
             wordPool = rawText.split(',')
                              .map(word => word.trim())
                              .filter(word => word.length > 0);
             
-            updateCounter();
+            pickedWords = []; 
+            updateUI();
             return true;
         }
 
         function pickWord() {
             const resultDiv = document.getElementById('result');
             
-            // If pool is empty, try to load from input (or handle empty state)
             if (wordPool.length === 0) {
+                if (pickedWords.length > 0) {
+                     resultDiv.innerHTML = "<span style='color: var(--rb-text-sub); font-size: 18px;'>All words picked! Press Reset to reload.</span>";
+                     return;
+                }
+
                 const loaded = initializePool();
-                if (!loaded) {
-                    resultDiv.innerHTML = "<span style='color: #e74c3c; font-size: 18px;'>Please enter some words first!</span>";
+                if (!loaded || wordPool.length === 0) {
+                    resultDiv.innerHTML = "<span style='color: var(--rb-red); font-size: 18px;'>Please enter some words first!</span>";
                     return;
                 }
-                if (wordPool.length === 0) return;
             }
 
-            // Pick a random index
             const randomIndex = Math.floor(Math.random() * wordPool.length);
-            
-            // Extract the word (splice removes it from the array)
             const selectedWord = wordPool.splice(randomIndex, 1)[0];
             
-            // Display result and update counter
+            pickedWords.push(selectedWord);
             resultDiv.innerText = selectedWord;
-            updateCounter();
-
-            if (wordPool.length === 0) {
-                document.getElementById('counter').innerText = "All words have been picked! Click 'Pick' again or 'Reset' to reload.";
-            }
+            updateUI();
         }
 
         function resetPool() {
-            initializePool();
-            document.getElementById('result').innerText = "...";
-            alert("Word list reloaded!");
+            if(initializePool()){
+                document.getElementById('result').innerText = "...";
+                const resetBtn = document.querySelector('.btn-reset');
+                resetBtn.innerText = "Reloaded!";
+                setTimeout(() => resetBtn.innerText = "Reset List", 1000);
+            }
         }
 
-        function updateCounter() {
-            document.getElementById('counter').innerText = `Words remaining: ${wordPool.length}`;
+        function updateUI() {
+            document.getElementById('counter').innerText = `Words remaining in pool: ${wordPool.length}`;
+            
+            const listElement = document.getElementById('pickedList');
+            listElement.innerHTML = ''; 
+
+            for (let i = pickedWords.length - 1; i >= 0; i--) {
+                const li = document.createElement('li');
+                li.innerText = pickedWords[i];
+                listElement.appendChild(li);
+            }
         }
 
-        // Initialize counter on load if there's default text
         window.onload = initializePool;
     </script>
 
-</body>
-</html>
+
+</body></html>
