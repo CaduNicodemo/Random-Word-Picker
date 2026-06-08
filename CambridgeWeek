@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Word Picker (No Repeats)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            background: white;
+        }
+        h2 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+            resize: vertical;
+        }
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            flex: 1;
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .btn-pick {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .btn-pick:hover {
+            background-color: #27ae60;
+        }
+        .btn-reset {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .btn-reset:hover {
+            background-color: #c0392b;
+        }
+        #result-container {
+            margin-top: 30px;
+            text-align: center;
+            min-height: 80px;
+        }
+        #result {
+            font-size: 32px;
+            font-weight: bold;
+            color: #34495e;
+            word-wrap: break-word;
+        }
+        #counter {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Random Word Picker</h2>
+    
+    <p><strong>Step 1:</strong> Paste your comma-separated words below:</p>
+    <textarea id="wordInput" placeholder="apple, banana, cherry, dragonfruit, elderberry"></textarea>
+    
+    <div class="controls">
+        <button class="btn-pick" onclick="pickWord()">Pick a Word</button>
+        <button class="btn-reset" onclick="resetPool()">Reset List</button>
+    </div>
+
+    <div id="result-container">
+        <div id="result">...</div>
+        <div id="counter">Words remaining: 0</div>
+    </div>
+
+    <script>
+        let wordPool = [];
+
+        // Initializes or re-initializes the pool from the textarea
+        function initializePool() {
+            const rawText = document.getElementById('wordInput').value;
+            if (!rawText.trim()) {
+                wordPool = [];
+                updateCounter();
+                return false;
+            }
+            
+            // Split by comma, trim whitespace, and filter out empty items
+            wordPool = rawText.split(',')
+                             .map(word => word.trim())
+                             .filter(word => word.length > 0);
+            
+            updateCounter();
+            return true;
+        }
+
+        function pickWord() {
+            const resultDiv = document.getElementById('result');
+            
+            // If pool is empty, try to load from input (or handle empty state)
+            if (wordPool.length === 0) {
+                const loaded = initializePool();
+                if (!loaded) {
+                    resultDiv.innerHTML = "<span style='color: #e74c3c; font-size: 18px;'>Please enter some words first!</span>";
+                    return;
+                }
+                if (wordPool.length === 0) return;
+            }
+
+            // Pick a random index
+            const randomIndex = Math.floor(Math.random() * wordPool.length);
+            
+            // Extract the word (splice removes it from the array)
+            const selectedWord = wordPool.splice(randomIndex, 1)[0];
+            
+            // Display result and update counter
+            resultDiv.innerText = selectedWord;
+            updateCounter();
+
+            if (wordPool.length === 0) {
+                document.getElementById('counter').innerText = "All words have been picked! Click 'Pick' again or 'Reset' to reload.";
+            }
+        }
+
+        function resetPool() {
+            initializePool();
+            document.getElementById('result').innerText = "...";
+            alert("Word list reloaded!");
+        }
+
+        function updateCounter() {
+            document.getElementById('counter').innerText = `Words remaining: ${wordPool.length}`;
+        }
+
+        // Initialize counter on load if there's default text
+        window.onload = initializePool;
+    </script>
+
+</body>
+</html>
