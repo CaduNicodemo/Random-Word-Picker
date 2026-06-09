@@ -3,249 +3,16 @@
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Random Word Picker - Red Balloon Cambridge Week</title>
-    <style>
-        /* CSS Variables based on the Red Balloon color palette */
-        :root {
-            --rb-red: #D71920;      /* Main Red from buttons/logo */
-            --rb-blue: #3A3699;     /* Blue from "Bilingual School" button */
-            --rb-text-main: #231F20; /* Dark Grey text */
-            --rb-text-sub: #58595B;  /* Lighter Grey text */
-            --rb-bg-light: #F9F9F9;  /* Light background tint */
-            --rb-white: #FFFFFF;
-        }
-
-        /* Loading a clean font from Google Fonts */
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--rb-bg-light);
-            color: var(--rb-text-main);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* --- New Header Layout --- */
-        header {
-            width: 100%;
-            background-color: var(--rb-white);
-            padding: 15px 40px;
-            display: flex;
-            justify-content: space-evenly;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            border-bottom-left-radius: 24px;
-            border-bottom-right-radius: 24px;
-            max-width: 1200px;
-            margin-bottom: 30px;
-        }
-
-        .header-logos {
-            display: flex;
-            align-items: center;
-            gap: 25px;
-        }
-
-        .logo-rb {
-            height: 90px; /* Height adjustment for Red Balloon Logo */
-            width: auto;
-        }
-
-        .logo-cambridge {
-            height: 70px; /* Height adjustment for Cambridge Logo */
-            width: auto;
-        }
-
-        header h1 {
-            font-size: 18px;
-            color: var(--rb-blue);
-            margin: 0;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* --- Layout Container --- */
-        .main-container {
-            display: flex;
-            gap: 30px;
-            max-width: 1200px;
-            width: 100%;
-            padding: 0 40px 40px 40px;
-        }
-
-        /* --- Input & Controller Section --- */
-        .picker-section {
-            flex: 2;
-            background: var(--rb-white);
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-        }
-
-        p.instruction {
-            color: var(--rb-text-sub);
-            font-size: 14px;
-            margin-top: 0;
-            margin-bottom: 10px;
-        }
-
-        textarea {
-            width: 100%;
-            height: 120px;
-            padding: 15px;
-            border: 2px solid #E6E6E6;
-            border-radius: 8px;
-            box-sizing: border-box;
-            font-size: 16px;
-            font-family: inherit;
-            resize: vertical;
-            transition: border-color 0.2s;
-        }
-
-        textarea:focus {
-            outline: none;
-            border-color: var(--rb-blue);
-        }
-
-        .controls {
-            margin: 25px 0;
-            display: flex;
-            gap: 15px;
-        }
-
-        button {
-            flex: 1;
-            padding: 15px;
-            font-size: 16px;
-            font-family: inherit;
-            border: none;
-            border-radius: 30px; /* Rounded pill shape */
-            cursor: pointer;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: all 0.2s ease;
-        }
-
-        .btn-pick {
-            background-color: var(--rb-red);
-            color: var(--rb-white);
-        }
-        .btn-pick:hover {
-            background-color: #b5151b;
-            transform: translateY(-2px);
-        }
-
-        .btn-reset {
-            background-color: var(--rb-blue);
-            color: var(--rb-white);
-        }
-        .btn-reset:hover {
-            background-color: #2e2a7a;
-            transform: translateY(-2px);
-        }
-
-        #result-container {
-            margin-top: 20px;
-            text-align: center;
-            padding: 30px 20px;
-            background-color: #f0f0f8;
-            border-radius: 12px;
-        }
-
-        #result {
-            font-size: 44px;
-            font-weight: 700;
-            color: var(--rb-red);
-            word-wrap: break-word;
-            margin-bottom: 10px;
-        }
-
-        #counter {
-            font-size: 14px;
-            color: var(--rb-text-sub);
-            font-weight: 400;
-        }
-
-        /* --- Picked List Sidebar --- */
-        .history-section {
-            flex: 1;
-            background: var(--rb-white);
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .history-section h3 {
-            color: var(--rb-text-main);
-            margin-top: 0;
-            font-weight: 600;
-            border-bottom: 2px solid var(--rb-bg-light);
-            padding-bottom: 10px;
-        }
-
-        #pickedList {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-            overflow-y: auto;
-            max-height: 400px;
-        }
-
-        #pickedList li {
-            padding: 10px 15px;
-            border-bottom: 1px solid #EEEEEE;
-            color: var(--rb-text-sub);
-            font-size: 15px;
-            display: flex;
-            align-items: center;
-        }
-
-        #pickedList li:last-child {
-            border-bottom: none;
-        }
-
-        #pickedList li::before {
-            content: "✓";
-            color: var(--rb-red);
-            font-weight: bold;
-            margin-right: 12px;
-        }
-
-        /* Mobile Responsive adjustments */
-        @media (max-width: 768px) {
-            header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-                border-radius: 0;
-            }
-            .main-container {
-                flex-direction: column;
-                padding: 20px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
     <header>
         <div class="header-logos">
             <img class="logo-rb" src="./Logo-Header.png" alt="Red Balloon Logo">
-            <h1>Cambridge Week</h1>
-    <img class="logo-cambridge" src="./CEQ_logo.svg" alt="Cambridge English Exam Logo">
+            <img class="logo-cambridge" src="./CEQ_logo.svg" alt="Cambridge English Exam Logo">
         </div>
-        
+        <div class="levelSelect"><button class="btn-levelJ1-J2" onclick="loadWordList('J1-J2')">J1-J2</button><button class="btn-levelTA-T2" onclick="loadWordList('TA-T2')">TA-T2
+        </button><button class="btn-levelT3-T6" onclick="loadWordList('T3-T6')">T3-T6</button></div>
     </header>
 
     <div class="main-container">
@@ -273,6 +40,22 @@
     <script>
         let wordPool = [];
         let pickedWords = [];
+
+        // Word lists for each level
+        const wordLists = {
+            'J1-J2': 'Big Ben, Cambridge, England, football, guards, Hogwarts, island, king, London, marmalade, queen, rain, Shakespeare, tea, underground, Victoria, Wales, Yorkshire',
+            'TA-T2': 'Big Ben, Cambridge, crown, England, football, fish and chips, guards, Hogwarts, island, king, London, marmalade, queen, rain, royal, rugby, Shakespeare, tea, underground, Victoria, Wales, Yorkshire',
+            'T3-T6': 'flat, lift, lorry, biscuit, chips, crisps, holidays, queue, torch, rubber, football, trousers, petrol, chemist, postman, tube, zebra crossing, timetable, garden, dummy, nappy, tap, jumper'
+        };
+
+        function loadWordList(level) {
+            const wordInput = document.getElementById('wordInput');
+            wordInput.value = wordLists[level];
+            wordPool = [];
+            pickedWords = [];
+            document.getElementById('result').innerText = '...';
+            updateUI();
+        }
 
         function initializePool() {
             const rawText = document.getElementById('wordInput').value;
