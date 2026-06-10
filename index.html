@@ -1,62 +1,362 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Random Word Picker - Red Balloon Cambridge Week</title>
+    <title>Random Word Picker</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
         <div class="header-logos">
             <img class="logo-rb" src="./Logo-Header.png" alt="Red Balloon Logo">
-            <img class="logo-cambridge" src="./CEQ_logo.svg" alt="Cambridge English Exam Logo">
+            <h1 id="header-title">Random Word Picker</h1>
         </div>
-        <div class="levelSelect"><button class="btn-levelJ1-J2" onclick="loadWordList('J1-J2')">J1-J2</button><button class="btn-levelTA-T2" onclick="loadWordList('TA-T2')">TA-T2
-        </button><button class="btn-levelT3-T6" onclick="loadWordList('T3-T6')">T3-T6</button></div>
     </header>
 
-    <div class="main-container">
-        <div class="picker-section">
-            <p class="instruction">Paste your comma-separated words below:</p>
-            <textarea id="wordInput" placeholder="apple, banana, cherry, dragonfruit..."></textarea>
-            
-            <div class="controls">
-                <button class="btn-pick" onclick="pickWord()">Pick a Word</button>
-                <button class="btn-reset" onclick="resetPool()">Reset List</button>
+    <!-- HOME PAGE -->
+    <div id="home-page" class="page-container">
+        <div class="home-content">
+            <h2>Select a Category</h2>
+            <div class="menu-grid">
+                <button class="menu-btn cambridge-week-btn" onclick="goToMenu('cambridge-week')">Cambridge Week</button>
+                <button class="menu-btn spelling-bee-btn" onclick="goToMenu('spelling-bee-1')">Spelling Bee List 1</button>
+                <button class="menu-btn spelling-bee-btn" onclick="goToMenu('spelling-bee-2')">Spelling Bee List 2</button>
+                <button class="menu-btn spelling-bee-btn" onclick="goToMenu('spelling-bee-3')">Spelling Bee List 3</button>
+                <button class="menu-btn spelling-bee-btn" onclick="goToMenu('spelling-bee-4')">Spelling Bee List 4</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MENU PAGE (Level Selection) -->
+    <div id="menu-page" class="page-container" style="display: none;">
+        <div class="menu-content">
+            <h2 id="menu-title">Select a Level</h2>
+            <div class="level-buttons" id="level-buttons-container">
+                <!-- Dynamically populated -->
+            </div>
+            <button class="btn-back" onclick="goHome()">← Back to Home</button>
+        </div>
+    </div>
+
+    <!-- PRACTICE TYPE PAGE (Practice 1, Practice 2, Championship) -->
+    <div id="practice-type-page" class="page-container" style="display: none;">
+        <div class="menu-content">
+            <h2 id="practice-type-title">Select Practice Type</h2>
+            <div class="practice-type-buttons" id="practice-type-container">
+                <!-- Dynamically populated with Practice 1, Practice 2, Championship -->
+            </div>
+            <button class="btn-back" onclick="goToMenu(currentMenu)">← Back to Levels</button>
+        </div>
+    </div>
+
+    <!-- PRACTICE PAGE (Word Picker) -->
+    <div id="practice-page" class="page-container" style="display: none;">
+        <div class="main-container">
+            <div class="picker-section">
+                <p class="instruction">Paste your comma-separated words below:</p>
+                <textarea id="wordInput" placeholder="apple, banana, cherry, dragonfruit..."></textarea>
+                
+                <div class="controls">
+                    <button class="btn-pick" onclick="pickWord()">Pick a Word</button>
+                    <button class="btn-reset" onclick="resetPool()">Reset List</button>
+                </div>
+
+                <div id="result-container">
+                    <div id="result">...</div>
+                    <div id="counter">Words remaining in pool: 0</div>
+                </div>
             </div>
 
-            <div id="result-container">
-                <div id="result">...</div>
-                <div id="counter">Words remaining in pool: 0</div>
+            <div class="history-section">
+                <h3>Picked List</h3>
+                <ul id="pickedList"></ul>
             </div>
         </div>
 
-        <div class="history-section">
-            <h3>Picked List</h3>
-            <ul id="pickedList"></ul>
+        <div class="practice-nav">
+            <button class="btn-back" id="practice-back-btn" onclick="goBackFromPractice()">← Back</button>
         </div>
     </div>
 
     <script>
+        // ===== STATE MANAGEMENT =====
+        let currentPage = 'home';
+        let currentMenu = null;
+        let currentLevel = null;
         let wordPool = [];
         let pickedWords = [];
 
-        // Word lists for each level
-        const wordLists = {
-            'J1-J2': 'Big Ben, Cambridge, England, football, guards, Hogwarts, island, king, London, marmalade, queen, rain, Shakespeare, tea, underground, Victoria, Wales, Yorkshire',
-            'TA-T2': 'Big Ben, Cambridge, crown, England, football, fish and chips, guards, Hogwarts, island, king, London, marmalade, queen, rain, royal, rugby, Shakespeare, tea, underground, Victoria, Wales, Yorkshire',
-            'T3-T6': 'flat, lift, lorry, biscuit, chips, crisps, holidays, queue, torch, rubber, football, trousers, petrol, chemist, postman, tube, zebra crossing, timetable, garden, dummy, nappy, tap, jumper'
+        // ===== WORD LISTS DATA =====
+        const wordDatabase = {
+            'cambridge-week': {
+                name: 'Cambridge Week',
+                levels: {
+                    'J1-J2': 'Big Ben, Cambridge, England, football, guards, island, king, London, marmalade, queen, rain, Shakespeare, tea, underground, Victoria, Wales, Yorkshire, Hogwarts, royal, rugby',
+                    'TA-T2': 'Big Ben, Cambridge, crown, England, football, fish and chips, guards, island, king, London, marmalade, queen, rain, royal, rugby, Shakespeare, tea, underground, Victoria, Wales, Yorkshire, Hogwarts',
+                    'T3-T6': 'flat, lift, lorry, biscuit, chips, crisps, holidays, queue, torch, rubber, football, trousers, petrol, chemist, postman, tube, zebra crossing, timetable, garden, dummy, nappy, tap, jumper'
+                }
+            },
+            'spelling-bee-1': {
+                name: 'Spelling Bee List 1',
+                levels: {
+                    'J1': {
+                        'Practice 1': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Practice 2': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Championship': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.'
+                    },
+                    'J2': {
+                        'Practice 1': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Practice 2': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Championship': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.'
+                    },
+                    'TA': {
+                        'Practice 1': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Practice 2': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Championship': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.'
+                    },
+                    'T1': {
+                        'Practice 1': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Practice 2': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Championship': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.'
+                    },
+                    'T2': {
+                        'Practice 1': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Practice 2': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Championship': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.'
+                    }
+                }
+            },
+            'spelling-bee-2': {
+                name: 'Spelling Bee List 2',
+                levels: {
+                    'J1': {
+                        'Practice 1': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Practice 2': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Championship': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.'
+                    },
+                    'J2': {
+                        'Practice 1': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Practice 2': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Championship': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.'
+                    },
+                    'TA': {
+                        'Practice 1': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Practice 2': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Championship': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.'
+                    },
+                    'T1': {
+                        'Practice 1': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Practice 2': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Championship': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.'
+                    },
+                    'T2': {
+                        'Practice 1': 'meals, sugar, throat, useful, creative, nervous, healthy, sweeter than, busier than, more dangerous, farther, worse, faster, as tasty as, as good as, more fluently than, more slowly, do badly in Science, do well in Portuguese, make friends easily, make fun of friends, take a nap, take care of, take trips to, Bruce used to work.',
+                        'Practice 2': 'never used to watch, didn\'t use to be, Where did you use to live?, started writing songs, became famous, felt lonely, was a Star Trek fan, worked at Starbucks, were friends, about ten hours, over twenty songs, under eighteen years old, in the universe, in the world, on Earth, on the fifth floor, in 1983, in three weeks, on February 21st, on Monday morning, the largest hot dog, the heaviest man, the least expensive restaurant, the furthest galaxy, the worst album',
+                        'Championship': 'meals, sugar, throat, useful, creative, nervous, healthy, sweeter than, busier than, more dangerous, farther, worse, faster, as tasty as, as good as, more fluently than, more slowly, do badly in Science, do well in Portuguese, make friends easily, , make fun of friends, take a nap, take care of, take trips to, Bruce used to work., never used to watch, didn\'t use to be, Where did you use to live?, started writing songs, became famous, felt lonely, was a Star Trek fan, worked at Starbucks, were friends, about ten hours, over twenty songs, under eighteen years old, in the universe, in the world, on Earth, on the fifth floor, in 1983, in three weeks, on February 21st, on Monday morning, the largest hot dog, the heaviest man, the least expensive restaurant, the furthest galaxy, the worst album'
+                    }
+                }
+            },
+            'spelling-bee-3': {
+                name: 'Spelling Bee List 3',
+                levels: {
+                    'J1': {
+                        'Practice 1': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Practice 2': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Championship': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.'
+                    },
+                    'J2': {
+                        'Practice 1': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Practice 2': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Championship': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.'
+                    },
+                    'TA': {
+                        'Practice 1': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Practice 2': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Championship': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.'
+                    },
+                    'T1': {
+                        'Practice 1': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Practice 2': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Championship': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.'
+                    },
+                    'T2': {
+                        'Practice 1': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Practice 2': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Championship': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.'
+                    }
+                }
+            },
+            'spelling-bee-4': {
+                name: 'Spelling Bee List 4',
+                levels: {
+                    'J1': {
+                        'Practice 1': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Practice 2': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Championship': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.'
+                    },
+                    'J2': {
+                        'Practice 1': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Practice 2': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Championship': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.'
+                    },
+                    'TA': {
+                        'Practice 1': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Practice 2': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Championship': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.'
+                    },
+                    'T1': {
+                        'Practice 1': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Practice 2': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Championship': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.'
+                    },
+                    'T2': {
+                        'Practice 1': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Practice 2': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.',
+                        'Championship': 'Sorry\, I couldn\'t put all the words in the list yet. If you would like to help, please type these list and send me them.'
+                    }
+                }
+            }
         };
 
-        function loadWordList(level) {
-            const wordInput = document.getElementById('wordInput');
-            wordInput.value = wordLists[level];
+        // ===== PAGE NAVIGATION =====
+        function showPage(pageName) {
+            document.getElementById('home-page').style.display = 'none';
+            document.getElementById('menu-page').style.display = 'none';
+            document.getElementById('practice-type-page').style.display = 'none';
+            document.getElementById('practice-page').style.display = 'none';
+
+            if (pageName === 'home') {
+                document.getElementById('home-page').style.display = 'block';
+                document.getElementById('header-title').textContent = 'Random Word Picker';
+            } else if (pageName === 'menu') {
+                document.getElementById('menu-page').style.display = 'block';
+            } else if (pageName === 'practice-type') {
+                document.getElementById('practice-type-page').style.display = 'block';
+            } else if (pageName === 'practice') {
+                document.getElementById('practice-page').style.display = 'block';
+            }
+
+            currentPage = pageName;
+        }
+
+        function goHome() {
+            showPage('home');
+        }
+
+        function goToMenu(menuId) {
+            currentMenu = menuId;
+            const menuData = wordDatabase[menuId];
+            
+            if (!menuData) {
+                console.error('Menu not found:', menuId);
+                return;
+            }
+
+            // Update title
+            document.getElementById('menu-title').textContent = `${menuData.name} - Select a Level`;
+            document.getElementById('header-title').textContent = menuData.name;
+
+            // Generate level buttons
+            const container = document.getElementById('level-buttons-container');
+            container.innerHTML = '';
+
+            for (const level in menuData.levels) {
+                const btn = document.createElement('button');
+                btn.className = 'level-btn';
+                btn.id = `level-${level.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
+                btn.textContent = level;
+                // Cambridge Week goes directly to practice, others go to practice type selection
+                if (menuId === 'cambridge-week') {
+                    btn.onclick = () => goToPracticeFromLevel(menuId, level);
+                } else {
+                    btn.onclick = () => goToPracticeType(menuId, level);
+                }
+                container.appendChild(btn);
+            }
+
+            showPage('menu');
+        }
+
+        function goToPracticeFromLevel(menuId, level) {
+            currentMenu = menuId;
+            currentLevel = level;
+            const menuData = wordDatabase[menuId];
+            const words = menuData.levels[level];
+
+            // Update header
+            document.getElementById('header-title').textContent = `${menuData.name} - ${level}`;
+
+            // Load words into textarea
+            document.getElementById('wordInput').value = words;
             wordPool = [];
             pickedWords = [];
             document.getElementById('result').innerText = '...';
             updateUI();
+
+            showPage('practice');
         }
 
+        function goToPracticeType(menuId, level) {
+            currentMenu = menuId;
+            currentLevel = level;
+            const menuData = wordDatabase[menuId];
+
+            if (!menuData || !menuData.levels[level]) {
+                console.error('Menu or level not found');
+                return;
+            }
+
+            // Update title
+            document.getElementById('practice-type-title').textContent = `${menuData.name} - ${level} - Select Practice Type`;
+            document.getElementById('header-title').textContent = `${menuData.name} - ${level}`;
+
+            // Generate practice type buttons
+            const container = document.getElementById('practice-type-container');
+            container.innerHTML = '';
+
+            const practiceTypes = ['Practice 1', 'Practice 2', 'Championship'];
+            for (const practiceType of practiceTypes) {
+                const btn = document.createElement('button');
+                btn.className = 'level-btn';
+                btn.id = `practice-${practiceType.toLowerCase().replace(/\s+/g, '-')}`;
+                btn.textContent = practiceType;
+                btn.onclick = () => goToPractice(menuId, level, practiceType);
+                container.appendChild(btn);
+            }
+
+            showPage('practice-type');
+        }
+
+        function goToPractice(menuId, level, practiceType) {
+            currentMenu = menuId;
+            currentLevel = level;
+            const menuData = wordDatabase[menuId];
+            const words = menuData.levels[level][practiceType];
+
+            // Update header
+            document.getElementById('header-title').textContent = `${menuData.name} - ${level} - ${practiceType}`;
+
+            // Load words into textarea
+            document.getElementById('wordInput').value = words;
+            wordPool = [];
+            pickedWords = [];
+            document.getElementById('result').innerText = '...';
+            updateUI();
+
+            showPage('practice');
+        }
+
+        function goBackFromPractice() {
+            // If Cambridge Week, go back to menu. Otherwise go back to practice type selection
+            if (currentMenu === 'cambridge-week') {
+                goToMenu(currentMenu);
+            } else {
+                goToPracticeType(currentMenu, currentLevel);
+            }
+        }
+
+        // ===== WORD PICKER LOGIC =====
         function initializePool() {
             const rawText = document.getElementById('wordInput').value;
             if (!rawText.trim()) {
@@ -81,7 +381,7 @@
                 if (pickedWords.length > 0) {
                      resultDiv.innerHTML = "<span style='color: var(--rb-text-sub); font-size: 18px;'>All words picked! Press Reset to reload.</span>";
                      return;
-                }
+                 }
 
                 const loaded = initializePool();
                 if (!loaded || wordPool.length === 0) {
@@ -120,8 +420,10 @@
             }
         }
 
-        window.onload = initializePool;
+        // ===== INITIALIZATION =====
+        window.onload = function() {
+            showPage('home');
+        };
     </script>
-
-
-</body></html>
+</body>
+</html>
