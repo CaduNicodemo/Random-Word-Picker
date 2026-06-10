@@ -287,8 +287,9 @@
         }
 
         .menu-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            display: flex;
+            flex-wrap: wrap;
+            flex-direction: row;
             gap: 20px;
             margin: 0 auto;
         }
@@ -501,6 +502,10 @@
             }
             .menu-grid {
                 grid-template-columns: 1fr;
+            }
+            .menu-btn {
+            padding: 5px;
+            font-size: 10px;
             }
             .level-buttons {
                 grid-template-columns: 1fr;
