@@ -25,6 +25,25 @@
                 <button class="menu-btn spelling-bee-btn" onclick="goToMenu('spelling-bee-3')">Spelling Bee List 3</button>
                 <button class="menu-btn spelling-bee-btn" onclick="goToMenu('spelling-bee-4')">Spelling Bee List 4</button>
             </div>
+            <div class="picker-section">
+            <p class="instruction">Paste your comma-separated words below:</p>
+            <textarea id="wordInput" placeholder="apple, banana, cherry, dragonfruit..."></textarea>
+            
+            <div class="controls">
+                <button class="btn-pick" onclick="pickWord()">Pick a Word</button>
+                <button class="btn-reset" onclick="resetPool()">Reset List</button>
+            </div>
+
+            <div id="result-container">
+                <div id="result">...</div>
+                <div id="counter">Words remaining in pool: 0</div>
+            </div>
+        </div>
+
+        <div class="history-section">
+            <h3>Picked List</h3>
+            <ul id="pickedList"></ul>
+        </div>
         </div>
     </div>
 
