@@ -74,7 +74,7 @@
         <div class="main-container">
             <div class="picker-section">
                 <p class="instruction">Paste your comma-separated words below:</p>
-                <textarea id="wordInput" placeholder="apple, banana, cherry, dragonfruit..."></textarea>
+                <textarea id="practiceWordInput" placeholder="apple, banana, cherry, dragonfruit..."></textarea>
                 
                 <div class="controls">
                     <button class="btn-pick" onclick="pickWord()">Pick a Word</button>
@@ -82,14 +82,14 @@
                 </div>
 
                 <div id="result-container">
-                    <div id="result">...</div>
-                    <div id="counter">Words remaining in pool: 0</div>
+                    <div id="practiceResult">...</div>
+                    <div id="practiceCounter">Words remaining in pool: 0</div>
                 </div>
             </div>
 
             <div class="history-section">
                 <h3>Picked List</h3>
-                <ul id="pickedList"></ul>
+                <ul id="practicePickedList"></ul>
             </div>
         </div>
 
@@ -238,26 +238,90 @@
             }
         };
 
-        // ===== PAGE NAVIGATION =====
-        function showPage(pageName) {
-            document.getElementById('home-page').style.display = 'none';
-            document.getElementById('menu-page').style.display = 'none';
-            document.getElementById('practice-type-page').style.display = 'none';
-            document.getElementById('practice-page').style.display = 'none';
+        // ===== AJUDA PARA IDENTIFICAR ELEMENTOS ATUAIS =====
+function getActiveElements() {
+    // Se estivermos na página de prática, usa os IDs com o prefixo 'practice'
+    if (currentPage === 'practice') {
+        return {
+            input: document.getElementById('practiceWordInput'),
+            result: document.getElementById('practiceResult'),
+            counter: document.getElementById('practiceCounter'),
+            list: document.getElementById('practicePickedList')
+        };
+    } 
+    // Caso contrário, usa os IDs da Home
+    return {
+        input: document.getElementById('wordInput'),
+        result: document.getElementById('result'),
+        counter: document.getElementById('counter'),
+        list: document.getElementById('pickedList')
+    };
+}
 
-            if (pageName === 'home') {
-                document.getElementById('home-page').style.display = 'block';
-                document.getElementById('header-title').textContent = 'Random Word Picker';
-            } else if (pageName === 'menu') {
-                document.getElementById('menu-page').style.display = 'block';
-            } else if (pageName === 'practice-type') {
-                document.getElementById('practice-type-page').style.display = 'block';
-            } else if (pageName === 'practice') {
-                document.getElementById('practice-page').style.display = 'block';
-            }
+// ===== WORD PICKER LOGIC =====
+function initializePool() {
+    const els = getActiveElements();
+    const rawText = els.input.value;
+    
+    if (!rawText.trim()) {
+        wordPool = [];
+        updateUI();
+        return false;
+    }
+    
+    wordPool = rawText.split(',').map(word => word.trim()).filter(word => word.length > 0);
+    pickedWords = []; 
+    updateUI();
+    return true;
+}
 
-            currentPage = pageName;
+function pickWord() {
+    const els = getActiveElements();
+    
+    if (wordPool.length === 0) {
+        if (pickedWords.length > 0) {
+             els.result.innerHTML = "<span style='color: var(--rb-text-sub); font-size: 18px;'>All words picked! Press Reset to reload.</span>";
+             return;
         }
+        const loaded = initializePool();
+        if (!loaded) return;
+    }
+ 
+    const randomIndex = Math.floor(Math.random() * wordPool.length);
+    const selectedWord = wordPool.splice(randomIndex, 1)[0];
+    
+    pickedWords.push(selectedWord);
+    els.result.innerText = selectedWord;
+    updateUI();
+}
+
+function resetPool() {
+    if(initializePool()){
+        const els = getActiveElements();
+        els.result.innerText = "...";
+    }
+}
+
+function updateUI() {
+    const els = getActiveElements();
+    els.counter.innerText = `Words remaining in pool: ${wordPool.length}`;
+    
+    els.list.innerHTML = ''; 
+    for (let i = pickedWords.length - 1; i >= 0; i--) {
+        const li = document.createElement('li');
+        li.innerText = pickedWords[i];
+        els.list.appendChild(li);
+    }
+}
+
+// ===== NAVEGAÇÃO (Mantendo o que já funcionava) =====
+function showPage(pageName) {
+    currentPage = pageName; // Atualiza a variável global de controle
+    document.getElementById('home-page').style.display = (pageName === 'home') ? 'block' : 'none';
+    document.getElementById('menu-page').style.display = (pageName === 'menu') ? 'block' : 'none';
+    document.getElementById('practice-type-page').style.display = (pageName === 'practice-type') ? 'block' : 'none';
+    document.getElementById('practice-page').style.display = (pageName === 'practice') ? 'block' : 'none';
+}
 
         function goHome() {
             showPage('home');
@@ -266,15 +330,7 @@
         function goToMenu(menuId) {
             currentMenu = menuId;
             const menuData = wordDatabase[menuId];
-            
-            if (!menuData) {
-                console.error('Menu not found:', menuId);
-                return;
-            }
-
-            // Update title
             document.getElementById('menu-title').textContent = `${menuData.name} - Select a Level`;
-            document.getElementById('header-title').textContent = menuData.name;
 
             // Generate level buttons
             const container = document.getElementById('level-buttons-container');
@@ -283,166 +339,40 @@
             for (const level in menuData.levels) {
                 const btn = document.createElement('button');
                 btn.className = 'level-btn';
-                btn.id = `level-${level.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
                 btn.textContent = level;
-                // Cambridge Week goes directly to practice, others go to practice type selection
-                if (menuId === 'cambridge-week') {
-                    btn.onclick = () => goToPracticeFromLevel(menuId, level);
-                } else {
-                    btn.onclick = () => goToPracticeType(menuId, level);
-                }
+                btn.onclick = () => (menuId === 'cambridge-week') ? goToPractice(menuId, level, null) : goToPracticeType(menuId, level);
                 container.appendChild(btn);
-            }
-
-            showPage('menu');
         }
-
-        function goToPracticeFromLevel(menuId, level) {
-            currentMenu = menuId;
-            currentLevel = level;
-            const menuData = wordDatabase[menuId];
-            const words = menuData.levels[level];
-
-            // Update header
-            document.getElementById('header-title').textContent = `${menuData.name} - ${level}`;
-
-            // Load words into textarea
-            document.getElementById('wordInput').value = words;
-            wordPool = [];
-            pickedWords = [];
-            document.getElementById('result').innerText = '...';
-            updateUI();
-
-            showPage('practice');
-        }
-
-        function goToPracticeType(menuId, level) {
-            currentMenu = menuId;
-            currentLevel = level;
-            const menuData = wordDatabase[menuId];
-
-            if (!menuData || !menuData.levels[level]) {
-                console.error('Menu or level not found');
-                return;
-            }
-
-            // Update title
-            document.getElementById('practice-type-title').textContent = `${menuData.name} - ${level} - Select Practice Type`;
-            document.getElementById('header-title').textContent = `${menuData.name} - ${level}`;
-
-            // Generate practice type buttons
-            const container = document.getElementById('practice-type-container');
-            container.innerHTML = '';
-
-            const practiceTypes = ['Practice 1', 'Practice 2', 'Championship'];
-            for (const practiceType of practiceTypes) {
-                const btn = document.createElement('button');
-                btn.className = 'level-btn';
-                btn.id = `practice-${practiceType.toLowerCase().replace(/\s+/g, '-')}`;
-                btn.textContent = practiceType;
-                btn.onclick = () => goToPractice(menuId, level, practiceType);
-                container.appendChild(btn);
-            }
-
-            showPage('practice-type');
-        }
-
-        function goToPractice(menuId, level, practiceType) {
-            currentMenu = menuId;
-            currentLevel = level;
-            const menuData = wordDatabase[menuId];
-            const words = menuData.levels[level][practiceType];
-
-            // Update header
-            document.getElementById('header-title').textContent = `${menuData.name} - ${level} - ${practiceType}`;
-
-            // Load words into textarea
-            document.getElementById('wordInput').value = words;
-            wordPool = [];
-            pickedWords = [];
-            document.getElementById('result').innerText = '...';
-            updateUI();
-
-            showPage('practice');
-        }
-
-        function goBackFromPractice() {
-            // If Cambridge Week, go back to menu. Otherwise go back to practice type selection
-            if (currentMenu === 'cambridge-week') {
-                goToMenu(currentMenu);
-            } else {
-                goToPracticeType(currentMenu, currentLevel);
-            }
-        }
-
-        // ===== WORD PICKER LOGIC =====
-        function initializePool() {
-            const rawText = document.getElementById('wordInput').value;
-            if (!rawText.trim()) {
-                wordPool = [];
-                updateUI();
-                return false;
-            }
-            
-            wordPool = rawText.split(',')
-                             .map(word => word.trim())
-                             .filter(word => word.length > 0);
-            
-            pickedWords = []; 
-            updateUI();
-            return true;
-        }
-
-        function pickWord() {
-            const resultDiv = document.getElementById('result');
-            
-            if (wordPool.length === 0) {
-                if (pickedWords.length > 0) {
-                     resultDiv.innerHTML = "<span style='color: var(--rb-text-sub); font-size: 18px;'>All words picked! Press Reset to reload.</span>";
-                     return;
-                 }
-
-                const loaded = initializePool();
-                if (!loaded || wordPool.length === 0) {
-                    resultDiv.innerHTML = "<span style='color: var(--rb-red); font-size: 18px;'>Please enter some words first!</span>";
-                    return;
-                }
-            }
-
-            const randomIndex = Math.floor(Math.random() * wordPool.length);
-            const selectedWord = wordPool.splice(randomIndex, 1)[0];
-            
-            pickedWords.push(selectedWord);
-            resultDiv.innerText = selectedWord;
-            updateUI();
-        }
-
-        function resetPool() {
-            if(initializePool()){
-                document.getElementById('result').innerText = "...";
-                const resetBtn = document.querySelector('.btn-reset');
-                resetBtn.innerText = "Reloaded!";
-                setTimeout(() => resetBtn.innerText = "Reset List", 1000);
-            }
-        }
-
-        function updateUI() {
-            document.getElementById('counter').innerText = `Words remaining in pool: ${wordPool.length}`;
-            
-            const listElement = document.getElementById('pickedList');
-            listElement.innerHTML = ''; 
-
-            for (let i = pickedWords.length - 1; i >= 0; i--) {
-                const li = document.createElement('li');
-                li.innerText = pickedWords[i];
-                listElement.appendChild(li);
-            }
-        }
-
-        // ===== INITIALIZATION =====
-        window.onload = function() {
-            showPage('home');
-        };
-    </script>
+        showPage('menu');
+    }
+    function goToPracticeType(menuId, level) {
+        currentLevel = level;
+        const container = document.getElementById('practice-type-container');
+        container.innerHTML = '';
+        ['Practice 1', 'Practice 2', 'Championship'].forEach(type => {
+        const btn = document.createElement('button');
+            btn.className = 'level-btn';
+            btn.textContent = type;
+            btn.onclick = () => goToPractice(menuId, level, type);
+            container.appendChild(btn);
+        });
+        showPage('practice-type');
+    }
+        function goToPractice(menuId, level, type) {
+        currentMenu = menuId;
+        const words = type ? wordDatabase[menuId].levels[level][type] : wordDatabase[menuId].levels[level];
+        
+        showPage('practice');
+        // Agora usamos getActiveElements para garantir que vamos escrever no textarea correto
+        const els = getActiveElements();
+        els.input.value = words;
+        wordPool = [];
+        pickedWords = [];
+        els.result.innerText = '...';
+        updateUI();
+    }
+function goBackFromPractice() {
+        (currentMenu === 'cambridge-week') ? goToMenu(currentMenu) : goToPracticeType(currentMenu, currentLevel);
+    };</script>
 </body>
 </html>
