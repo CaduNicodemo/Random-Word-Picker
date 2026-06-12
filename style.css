@@ -4,7 +4,8 @@
             --rb-blue: #3A3699;     /* Blue from "Bilingual School" button */
             --rb-yellow: #FABE2D;    /* Yellow from "J1-J2" button */
             --rb-light-blue: #A0D2FA;    /* Light Blue from "TA-T2" button */
-            --rb-green: #28946A;     /* Green from "T3-T6" button */
+            --rb-green: #258f69;
+            --rb-pink:#f2aacc;     /* Green from "T3-T6" button */
             --rb-text-main: #231F20; /* Dark Grey text */
             --rb-text-sub: #58595B;  /* Lighter Grey text */
             --rb-bg-light: #F9F9F9;  /* Light background tint */
@@ -206,6 +207,19 @@
             color: var(--rb-text-sub);
             font-weight: 400;
         }
+        #practiceResult {
+            font-size: 44px;
+            font-weight: 700;
+            color: var(--rb-red);
+            word-wrap: break-word;
+            margin-bottom: 10px;
+        }
+
+        #practiceCounter {
+            font-size: 14px;
+            color: var(--rb-text-sub);
+            font-weight: 400;
+        }
 
         /* --- Picked List Sidebar --- */
         .history-section {
@@ -248,6 +262,33 @@
         }
 
         #pickedList li::before {
+            content: "✓";
+            color: var(--rb-red);
+            font-weight: bold;
+            margin-right: 12px;
+        }
+        #practicePickedList {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+
+        #practicePickedList li {
+            padding: 10px 15px;
+            border-bottom: 1px solid #EEEEEE;
+            color: var(--rb-text-sub);
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        #practicePickedList li:last-child {
+            border-bottom: none;
+        }
+
+        #practicePickedList li::before {
             content: "✓";
             color: var(--rb-red);
             font-weight: bold;
@@ -320,6 +361,21 @@
 
         .spelling-bee-btn {
             background:  var(--rb-text-sub);
+        }
+        .list1 {
+            background: var(--rb-yellow);
+        }
+
+        .list2 {
+            background: var(--rb-light-blue);
+        }
+
+        .list3 {
+            background: var(--rb-green);
+        }
+
+        .list4 {
+            background: var(--rb-pink);
         }
 
         .spelling-bee-btn:hover {
